@@ -5,9 +5,10 @@ class Path {
   constructor( maze ) {
     this.pathTaken = [ new TileCoordinates(0,0) ]
     this.maze = maze
+    this.end = new TileCoordinates( maze.width, maze.height )
   }
   
-  currentPosition() {
+  currentCoords() {
     return this.pathTaken[this.pathTaken.length-1]
   }
 
@@ -16,9 +17,9 @@ class Path {
     for( let steps = 0 ; steps < numberOfSteps ; steps ++ )
     {
       this.maze.display()
-      let step = this.getClosestOpenTile( this.currentPosition() )
+      let step = this.getClosestOpenTile( this.currentCoords() )
 
-      if ( this.isSamePosition( step ) ) {
+      if ( step ===  undefined ) {
         this.backTrack()
       }
       else {
@@ -38,45 +39,39 @@ class Path {
   }
 
   isSamePosition( step ) {
-    let cp = this.currentPosition()
+    let cp = this.currentCoords()
 
     if ( cp.x == step.x && cp.y == step.y ) return true
 
     return false
   }
-  getClosestOpenTile( coords ) {
-    
-    return closest
+
+  getClosestOpenTile(coords) {
+    let openTiles = this.getOpenTiles( coords ) 
+    if ( openTiles ) {
+      return openTiles.reduce( (prev, cur) => {
+        if ( this.distanceToEnd( prev ) > this.distanceToEnd( cur ) ) {
+          return cur
+        } else {
+          return prev
+        }
+      })
+    }
+    else {
+      return undefined
+    }
   }
 
   getOpenTiles( coords ) {
     
-    let examineTiles = [ coords.left(), coords.right(), coords.up(), coords.down() ]
-    let openTiles = examineTiles.map( coords => {
-      if 
+    let openTiles = []
+    let examineTileCoords = [ coords.left(), coords.right(), coords.up(), coords.down() ]
+    
+    examineTileCoords.forEach( tileCoords => {
+      if ( this.tileIsOpen( tileCoords ) ) openTiles.push( tileCoords ) 
     })
-    
 
-    
-    if ( this.tileIsOpen( coords.left() )) openTiles.push(coords.left())
-    if ( this.tileIsOpen( coords.right() )) openTile.push(coords)
-  }
-
-  getCloserTile( newTile, closest ) {
-
-    // console.log( `comparing ${x},${y}`)
-    // console.log( this.maze.distanceToEnd( x, y ) )
-    // console.log( this.maze.distanceToEnd( closest.x, closest.y ) )
-
-    if ( this.tileIsOpen(newTile) ) {
-      if (  this.maze.distanceToEnd( x, y ) < 
-            this.maze.distanceToEnd( closest.x, closest.y )) {
-
-        // console.log( "CLOSER !")
-        return {x:x,y:y} 
-      }
-    }
-    return closest
+    return openTiles
   }
 
   tileIsOpen( tileCoordinates ) {
@@ -86,6 +81,10 @@ class Path {
     return false 
   }
 
+  distanceToEnd( coords ) {
+    let distance = Math.sqrt( Math.pow(this.width - coords.x,2) + Math.pow(this.height-coords.y,2) )
+    return distance
+  }
 }
 
 module.exports = Path

@@ -1,3 +1,4 @@
+var TileCoordinates = require('./tileCoordinates')
 
 class Maze {
   constructor() {
@@ -14,25 +15,22 @@ class Maze {
     this.width = randInt(32)+4
     this.height = randInt(16)+4
 
+    this.generateMaze()
+  }
+
+  generateMaze() {
     // We are going to use a single array, you just break it up using the width of the maze
     // you can see the math and calcs in all the methods below...basically y*width + x gives you
     // the right tile.
     this.tiles = new Array(this.height*this.width)
     this.tiles.fill( this.tileSet.open )
 
-    this.generateMaze()
-  }
-
-  generateMaze() {
     // Place the walls
     let numberOfWalls = this.wallPercentage * this.tiles.length
 
     for( let wallIter = 0; wallIter < numberOfWalls ; wallIter++ ) {
-      this.setTile( randInt( this.width ), randInt( this.height ), this.tileSet.wall )
+      this.setTile( new TileCoordinates( randInt( this.width ), randInt( this.height ) ), this.tileSet.wall )
     }
-
-    // Place the player, but don't hate them.
-    this.setTile( 0,0, this.tileSet.player)
   }
   
   tile(tc) {
@@ -42,19 +40,14 @@ class Maze {
     return this.tiles[this.tileIndex(tc)]
   }
 
-  setTile(x,y, tile) {
-    this.tiles[this.tileIndex(x,y)] = tile 
+  setTile(tc, tile) {
+    this.tiles[this.tileIndex(tc)] = tile 
   }
 
   tileIndex( tc ){
     return tc.y*this.width + tc.x
   }
   
-  distanceToEnd( x, y ) {
-    let distance = Math.sqrt( Math.pow(this.width - x,2) + Math.pow(this.height-y,2) )
-    return distance
-  }
-
   display() {
     console.log( `${this.width}x${this.height} @ ${this.wallPercentage * 100}% walls` )
     for( let y = 0 ; y < this.height ; y++ ) {
