@@ -1,8 +1,11 @@
+
 class Maze {
   constructor() {
   
     this.tileSet = {
       wall: '█',
+      path: '.',
+      wrong: 'x',
       player: '@',
       open: ' ',
     }
@@ -32,14 +35,26 @@ class Maze {
     this.setTile( 0,0, this.tileSet.player)
   }
   
-  tile(x,y) {
-    return this.tiles[y*this.width + x]
+  tile(tc) {
+    if ( tc.x < 0 || tc.x > this.width ) return this.tileSet.wall
+    if ( tc.y < 0 || tc.y > this.height ) return this.tileSet.wall
+
+    return this.tiles[this.tileIndex(tc)]
   }
 
   setTile(x,y, tile) {
-    this.tiles[y*this.width + x] = tile 
+    this.tiles[this.tileIndex(x,y)] = tile 
+  }
+
+  tileIndex( tc ){
+    return tc.y*this.width + tc.x
   }
   
+  distanceToEnd( x, y ) {
+    let distance = Math.sqrt( Math.pow(this.width - x,2) + Math.pow(this.height-y,2) )
+    return distance
+  }
+
   display() {
     console.log( `${this.width}x${this.height} @ ${this.wallPercentage * 100}% walls` )
     for( let y = 0 ; y < this.height ; y++ ) {
