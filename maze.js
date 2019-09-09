@@ -11,9 +11,9 @@ class Maze {
       open: ' ',
     }
 
-    this.wallPercentage = .5
-    this.width = randInt(32)+4
-    this.height = randInt(16)+4
+    this.wallPercentage = .25
+    this.width = randInt(24)+12
+    this.height = randInt(8)+8
 
     this.generateMaze()
   }
@@ -31,11 +31,16 @@ class Maze {
     for( let wallIter = 0; wallIter < numberOfWalls ; wallIter++ ) {
       this.setTile( new TileCoordinates( randInt( this.width ), randInt( this.height ) ), this.tileSet.wall )
     }
+
+    // Set the player start point, for visual reference
+    this.setTile( new TileCoordinates( 0,0 ) , this.tileSet.player )
+    // Set the ending open, just in case our random wall splatting covered it up. 
+    this.setTile( new TileCoordinates(this.width-1, this.height-1), this.tileSet.open )
   }
   
   tile(tc) {
-    if ( tc.x < 0 || tc.x > this.width ) return this.tileSet.wall
-    if ( tc.y < 0 || tc.y > this.height ) return this.tileSet.wall
+    if ( tc.x < 0 || tc.x >= this.width ) return this.tileSet.wall
+    if ( tc.y < 0 || tc.y >= this.height ) return this.tileSet.wall
 
     return this.tiles[this.tileIndex(tc)]
   }
@@ -45,6 +50,8 @@ class Maze {
   }
 
   tileIndex( tc ){
+    if ( tc === undefined ) return 0
+
     return tc.y*this.width + tc.x
   }
   

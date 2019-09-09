@@ -1,7 +1,8 @@
 var Maze = require( './maze.js' ) 
 var Path = require( './pathing.js' ) 
+var readline = require( 'readline' )
 
-function app() {
+async function app() {
     
   let maze = new Maze()
   
@@ -9,13 +10,26 @@ function app() {
 
   let path = new Path( maze )
 
-  path.findPath(50)
-  console.log( path.pathTaken )
+  while( path.findPath(1) ) {
+    await sleep( 100 )
+  }
 
   maze.display()
 
+  let length = path.pathTaken.length
+  if ( length > 1 ) {
+    console.log( `Length traveled: ${path.pathTaken.length} `)
+  }
+  else {
+    console.log( `No path, so sad, length travled: ${path.pathTaken.length}`)
+  }
+  
 };
 
-
+function sleep(ms){
+  return new Promise(resolve=>{
+      setTimeout(resolve,ms)
+  })
+}
 
 app() ;

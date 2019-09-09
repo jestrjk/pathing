@@ -3,9 +3,12 @@ var TileCoordinates = require('./tileCoordinates')
 
 class Path {
   constructor( maze ) {
-    this.pathTaken = [ new TileCoordinates(0,0) ]
+    this.start = new TileCoordinates( 0, 0 ) 
+    this.end = new TileCoordinates( maze.width-1, maze.height-1 )
+
+    this.pathTaken = [ this.start ]
     this.maze = maze
-    this.end = new TileCoordinates( maze.width, maze.height )
+    
   }
   
   currentCoords() {
@@ -16,26 +19,33 @@ class Path {
 
     for( let steps = 0 ; steps < numberOfSteps ; steps ++ )
     {
-      this.maze.display()
       let step = this.getClosestOpenTile( this.currentCoords() )
 
-      if ( step ===  undefined ) {
+      if ( step === undefined ) {
+        this.maze.display()
+        if ( this.pathTaken.length == 1 ) return false
         this.backTrack()
       }
       else {
+        this.maze.display()        
         this.takeStep( step )
+        if ( step.equals( this.end ) ) {
+          this.maze.setTile( step, this.maze.tileSet.player )
+          return false
+        }
       }
     }
+    return true
   }
 
   takeStep( step ) {
-    this.maze.setTile(step.x, step.y, this.maze.tileSet.path)
+    this.maze.setTile(step, this.maze.tileSet.path)
     this.pathTaken.push( step )  
   }
 
   backTrack() {
     let wrongPath = this.pathTaken.pop()
-    this.maze.setTile( wrongPath.x, wrongPath.y, this.maze.tileSet.wrong )
+    this.maze.setTile( wrongPath , this.maze.tileSet.wrong )
   }
 
   isSamePosition( step ) {
@@ -48,7 +58,8 @@ class Path {
 
   getClosestOpenTile(coords) {
     let openTiles = this.getOpenTiles( coords ) 
-    if ( openTiles ) {
+    if ( openTiles.length > 0 ) {
+
       return openTiles.reduce( (prev, cur) => {
         if ( this.distanceToEnd( prev ) > this.distanceToEnd( cur ) ) {
           return cur
@@ -64,6 +75,8 @@ class Path {
 
   getOpenTiles( coords ) {
     
+    if ( coords === undefined ) return []
+
     let openTiles = []
     let examineTileCoords = [ coords.left(), coords.right(), coords.up(), coords.down() ]
     
@@ -82,7 +95,7 @@ class Path {
   }
 
   distanceToEnd( coords ) {
-    let distance = Math.sqrt( Math.pow(this.width - coords.x,2) + Math.pow(this.height-coords.y,2) )
+    let distance = Math.sqrt( Math.pow(this.end.x - coords.x,2) + Math.pow(this.end.y - coords.y,2) )
     return distance
   }
 }
